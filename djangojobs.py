@@ -19,7 +19,7 @@ baseurl = "https://djangojobs.net/jobs/"
 def send_message():
     db = dataset.connect(db_file)
     table = db["records"]
-    records = table.find(was_sent=False, _limit=3)
+    records = table.find(was_sent=False, _limit=10)
     message_tmp = [
         "👉 [$position_name]($url) created at *$post_date*",
         "$skills",
@@ -58,22 +58,27 @@ def fetch_jobs():
     table = db["records"]
     results = []
     for page in range(10):
-        resp=requests.get(url, params={'page': page}, timeout=10).json()
-        page = BeautifulSoup(resp.content)
+        resp=requests.get(baseurl, params={'page': page}, timeout=10)
+        page = BeautifulSoup(resp.content, features="html.parser")
         blockquotes = page.findAll("blockquote")
         for b in blockquotes:
-            position_name, company_name = b.text.strip().split('at')
+            position_name, company_name = b.text.strip().split(' at ')
             info = b.find_next_sibling()
-            is_remote, relocation,  post_date = cleanup(info.text.split("|"))
+            is_remote, relocation,  post_date = cleanup(info.text.strip().split("|"))
             is_relocation, location =  cleanup(relocation.split(' \n\t'))
-            city, country = location.split(",")
+            try:
+                city, country = location.split(",")
+            except ValueError:
+                city, country, _ = location.split(",")
+
             skills = []
             description = info.find_next_sibling().text.strip()
-            curl = baseurl + info.find_next_sibling().find('a')["href"]
-            id = curl.split("/")[2]
-            job = dict(position_name=position_name,
+            curl =info.find_next_sibling().find('a')["href"]
+            id = int(curl.split("/")[2])
+            job = dict(
                        id = id,
-                       url=curl,
+                       position_name=position_name,
+                       url=f"https://djangojobs.net{curl}",
                        post_date=post_date,
                        skills=",".join(skills),
                        city=city,

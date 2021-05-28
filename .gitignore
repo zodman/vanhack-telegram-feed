@@ -161,4 +161,5 @@ node_modules/*
 tags
 static/*
 db.*
+db_*
 *.conf
