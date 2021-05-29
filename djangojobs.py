@@ -65,6 +65,9 @@ def fetch_jobs():
             position_name, company_name = b.text.strip().split(' at ')
             info = b.find_next_sibling()
             is_remote, relocation,  post_date = cleanup(info.text.strip().split("|"))
+            if not 'relocation: yes' in relocation.lower():
+                break
+            print(relocation)
             is_relocation, location =  cleanup(relocation.split(' \n\t'))
             try:
                 city, country = location.split(",")
