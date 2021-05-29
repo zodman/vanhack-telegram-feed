@@ -38,7 +38,7 @@ def send_message():
         res = Template(full_job_msg_tmpl).substitute(job)
         messages.append(res)
         i["was_sent"] = True
-        table.update(i, ["id"])
+        table.update(i, ["position_name"])
     if messages:
         conf = os.path.join(BASE,telegram_conf) 
         send(messages=messages, parse_mode="markdown", conf=conf)
@@ -73,7 +73,7 @@ def fetch_jobs():
                    country=country,
                    was_sent=False,
                    description=description)
-        table.insert_ignore(job, ['id'])
+        table.insert_ignore(job, ['position_name'])
 
 
 if __name__ == "__main__":
